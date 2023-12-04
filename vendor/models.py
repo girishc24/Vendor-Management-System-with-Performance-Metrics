@@ -15,25 +15,21 @@ class Vendor(models.Model):
 
 
 class PurchaseOrder(models.Model):
-    ORDER_PENDING = 'pending'
-    ORDER_COMPLETED = 'completed'
-    ORDER_CANCELED = 'canceled'
-
-    ORDER_CHOICES = [
-        (ORDER_PENDING, 'pending'),
-        (ORDER_COMPLETED, 'completed'),
-        (ORDER_CANCELED, 'canceled'),
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('canceled', 'Canceled'),
     ]
 
     po_number = models.CharField(max_length=50, unique=True)
     vendor = models.ForeignKey('Vendor', on_delete=models.CASCADE)
-    order_date = models.DateTimeField()
-    delivery_date = models.DateTimeField()
+    order_date = models.DateTimeField(auto_now=True)
+    delivery_date = models.DateTimeField(null=True, blank=True)
     items = models.JSONField()
     quantity = models.IntegerField()
-    status = models.CharField(max_length=9, choices=ORDER_CHOICES, default=ORDER_PENDING)
+    status = models.CharField(max_length=9, choices=STATUS_CHOICES, default='pending')
     quality_rating = models.FloatField(null=True, blank=True)
-    issue_date = models.DateTimeField()
+    issue_date = models.DateTimeField(null=True, blank=True)
     acknowledgment_date = models.DateTimeField(null=True, blank=True)
 
 
