@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from . models import Vendor, PurchaseOrder, HistoricalPerformance
 from . serializers import VendorSerializer, PurchaseOrderSerializer
-from .utils import update_on_time_delivery_rate, update_quality_rating_avg, update_average_response_time, update_fulfillment_rate
+from . utils import update_on_time_delivery_rate, update_quality_rating_avg, update_average_response_time, update_fulfillment_rate
 
 def main(request):
     return HttpResponse("Hello world!")
@@ -68,9 +68,15 @@ class PurchaseOrderDeatils(APIView):
 
 
     def get(self, request):
-        queryset = PurchaseOrder.objects.all()
-        seralizer = PurchaseOrderSerializer(queryset, many=True)
-        return Response(seralizer.data, status=status.HTTP_200_OK)
+        vendor_id = request.query_params.get('vendor')
+        if vendor_id is not None:
+            queryset = PurchaseOrder.objects.filter(vendor=vendor_id)
+            serializer = PurchaseOrderSerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            queryset = PurchaseOrder.objects.all()
+            seralizer = PurchaseOrderSerializer(queryset, many=True)
+            return Response(seralizer.data, status=status.HTTP_200_OK)
     
 
 
@@ -145,7 +151,7 @@ def acknowledge_purchase_order(request, po_id):
     po.acknowledgment_date = timezone.now()
     po.save()
 
-    # Update performance metrics
+    
     update_average_response_time(po.vendor)
 
     return Response({"message": "Purchase Order acknowledged successfully."}, status=status.HTTP_200_OK)
